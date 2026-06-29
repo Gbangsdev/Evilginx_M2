@@ -9,6 +9,7 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-acme/lego/v3 v3.1.0
 	github.com/go-resty/resty/v2 v2.12.0
+	github.com/go-rod/rod v0.116.2
 	github.com/gorilla/mux v1.7.3
 	github.com/inconshreveable/go-vhost v0.0.0-20160627193104-06d84117953b
 	github.com/miekg/dns v1.1.58
@@ -38,6 +39,13 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/ysmood/fetchup v0.2.3 // indirect
+	github.com/ysmood/goob v0.4.0 // indirect
+	github.com/ysmood/gop v0.2.0 // indirect
+	github.com/ysmood/got v0.40.0 // indirect
+	github.com/ysmood/gotrace v0.6.0 // indirect
+	github.com/ysmood/gson v0.7.3 // indirect
+	github.com/ysmood/leakless v0.9.0 // indirect
 	github.com/tidwall/btree v0.0.0-20170113224114-9876f1454cf0 // indirect
 	github.com/tidwall/gjson v1.14.0 // indirect
 	github.com/tidwall/grect v0.0.0-20161006141115-ba9a043346eb // indirect
