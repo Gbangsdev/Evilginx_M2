@@ -9,7 +9,6 @@ require (
 	github.com/fatih/color v1.13.0
 	github.com/go-acme/lego/v3 v3.1.0
 	github.com/go-resty/resty/v2 v2.12.0
-	github.com/go-rod/rod v0.116.2
 	github.com/gorilla/mux v1.7.3
 	github.com/inconshreveable/go-vhost v0.0.0-20160627193104-06d84117953b
 	github.com/miekg/dns v1.1.58
